@@ -1,6 +1,7 @@
 # native imports
+from os import umask
 import tkinter as tk
-from tkinter import messagebox
+import pickle as pk
 
 # third-party imports
 import Pmw as pmw
@@ -15,7 +16,9 @@ class ConfigPanel(tk.Frame):
         # since the list of applications and resources is short
         # theres no problem storing it in memory
         self.app_names = requestAPI("applications")
+        
         self.app_res_names = []
+        self.uomarr = []
 
         self.res_names = requestAPI("resources")
 
@@ -61,7 +64,12 @@ class ConfigPanel(tk.Frame):
             selectioncommand=self.select_resource
         )
 
-        self.uom_name_dropdown = pmw.ComboBox(self.config_options_frame)
+        self.uom_name_dropdown = pmw.ComboBox(
+            self.config_options_frame,
+            label_text="Units of Measurement",
+            labelpos="nw",
+            scrolledlist_items=self.uomarr
+        )
 
         self.application_name_dropdown.component("entryfield_entry").configure(
             state="disabled",
@@ -91,28 +99,67 @@ class ConfigPanel(tk.Frame):
         
         self.radio_var.set(1)
         self.set_config_options()
+        self.select_application(self.app_names[0])
 
     def set_config_options(self):
         selected_radio = self.radio_var.get()
-        self.reset_configs(selected_radio)
 
         if selected_radio == 1:
-            self.application_name_dropdown.pack(side="top", anchor="w", pady=5)
+            self.resources_name_dropdown.pack_forget()
+            self.uom_name_dropdown.pack_forget()
+
+            self.application_name_dropdown.pack(side="top", pady=5)
+            self.resources_name_dropdown.pack(side="top")
+            self.uom_name_dropdown.pack(side="top", pady=5)
+
+            self.application_name_dropdown.selectitem(self.app_names[0])
+            self.select_application(self.app_names[0])
         else:
             self.application_name_dropdown.pack_forget()
+            self.resources_name_dropdown.component("scrolledlist").setlist(self.res_names)
+            self.resources_name_dropdown.selectitem(self.res_names[0])
+            self.select_resource(self.res_names[0])
 
-    def select_application(self):
-        data = requestAPI("applications/"+self.application_name_dropdown.get())
-        
+    def select_application(self, selected):
+        self.app_res_names = ["All"]
+        self.uomarr = []
 
-    def select_resource(self):
-        pass
+        data = requestAPI("applications/"+selected)
+
+        for resource in data:
+            current_uom = resource["UnitOfMeasure"]
+            current_name = resource["ServiceName"]
+
+            if current_uom not in self.uomarr:
+                self.uomarr.append(current_uom)
+            
+            if current_name not in self.app_res_names:
+                self.app_res_names.append(current_name)
+
+        # set resources_dropdown and uom dropdown data before select
+        self.resources_name_dropdown.component("scrolledlist").setlist(self.app_res_names)
+        self.uom_name_dropdown.component("scrolledlist").setlist(self.uomarr)
+
+        self.resources_name_dropdown.selectitem(self.app_res_names[0])
+        self.uom_name_dropdown.selectitem(self.uomarr[0])
+        #self.select_resource(self.app_res_names[0], True)
+
+    def select_resource(self, selected):
+        if self.radio_var.get() == 1:
+            return
+
+        self.uomarr = []
+
+        data = requestAPI("resources/"+selected)
+
+        for resource in data:
+            current_uom = resource["UnitOfMeasure"]
+
+            if current_uom not in self.uomarr:
+                self.uomarr.append(current_uom)
+
+        self.uom_name_dropdown.component("scrolledlist").setlist(self.uomarr)
+        self.uom_name_dropdown.selectitem(self.uomarr[0])
 
     def create_new_plot(self):
         pass
-
-    def reset_configs(self, selected_radio):
-        if selected_radio == 1:
-            self.application_name_dropdown.selectitem(self.app_names[0])
-        
-        self.resources_name_dropdown.selectitem(self.res_names[0])
