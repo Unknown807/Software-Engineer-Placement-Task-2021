@@ -18,12 +18,10 @@ def checkConnectivity():
     except urllib.error.URLError:
         return False
 
-def get_app_or_res_list(path):
+def requestAPI(path):
     response = requests.get("https://engineering-task.elancoapps.com/api/"+path)
     
     if (response.status_code == 200):
         return response.json()
     else:
         return False
-
-    
