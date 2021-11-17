@@ -26,6 +26,9 @@ class Main(tk.Tk):
             side="left", fill="both", expand=True, 
             padx=5
         )
+
+    def pass_config_to_graph(self, *args):
+        self.graph_canvas.create_new_plot(*args)
         
 if __name__ == "__main__":
     root = Main()

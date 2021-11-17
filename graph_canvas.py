@@ -35,3 +35,12 @@ class GraphCanvas(tk.Frame):
         )
 
         self.toolbar.update()
+
+    def create_new_plot(self, selected_radio, app_name, res_name, uom_type):
+        if selected_radio == 1:
+            print(app_name)
+
+        print(res_name)
+        print(uom_type)
+
+        print("------------------------")

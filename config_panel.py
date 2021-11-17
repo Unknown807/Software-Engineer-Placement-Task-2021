@@ -1,5 +1,4 @@
 # native imports
-from os import umask
 import tkinter as tk
 import pickle as pk
 
@@ -12,6 +11,8 @@ from api_utils import requestAPI
 class ConfigPanel(tk.Frame):
     def __init__(self, parent):
         super().__init__(parent)
+
+        self.parent = parent
 
         # since the list of applications and resources is short
         # theres no problem storing it in memory
@@ -71,6 +72,7 @@ class ConfigPanel(tk.Frame):
             scrolledlist_items=self.uomarr
         )
 
+        # for styling purposes
         self.application_name_dropdown.component("entryfield_entry").configure(
             state="disabled",
             disabledbackground="white",
@@ -89,9 +91,16 @@ class ConfigPanel(tk.Frame):
             disabledforeground="black"
         )
 
+        self.plot_button = tk.Button(
+            self.config_options_frame,
+            text="Create Plot",
+            command=self.pass_config_to_root
+        )
+
         self.application_name_dropdown.pack(side="top", pady=5)
         self.resources_name_dropdown.pack(side="top")
         self.uom_name_dropdown.pack(side="top", pady=5)
+        self.plot_button.pack(side="top")
 
         # packing relevant frames
         self.data_type_frame.pack(side="top", fill="both", pady=5)
@@ -107,10 +116,12 @@ class ConfigPanel(tk.Frame):
         if selected_radio == 1:
             self.resources_name_dropdown.pack_forget()
             self.uom_name_dropdown.pack_forget()
+            self.plot_button.pack_forget()
 
             self.application_name_dropdown.pack(side="top", pady=5)
             self.resources_name_dropdown.pack(side="top")
             self.uom_name_dropdown.pack(side="top", pady=5)
+            self.plot_button.pack(side="top")
 
             self.application_name_dropdown.selectitem(self.app_names[0])
             self.select_application(self.app_names[0])
@@ -125,6 +136,9 @@ class ConfigPanel(tk.Frame):
         self.uomarr = []
 
         data = requestAPI("applications/"+selected)
+
+        with open("application_data.p", "wb") as save_file:
+            pk.dump(data, save_file, protocol=pk.DEFAULT_PROTOCOL)
 
         for resource in data:
             current_uom = resource["UnitOfMeasure"]
@@ -142,7 +156,6 @@ class ConfigPanel(tk.Frame):
 
         self.resources_name_dropdown.selectitem(self.app_res_names[0])
         self.uom_name_dropdown.selectitem(self.uomarr[0])
-        #self.select_resource(self.app_res_names[0], True)
 
     def select_resource(self, selected):
         if self.radio_var.get() == 1:
@@ -151,6 +164,9 @@ class ConfigPanel(tk.Frame):
         self.uomarr = []
 
         data = requestAPI("resources/"+selected)
+
+        with open("resource_data.p", "wb") as save_file:
+            pk.dump(data, save_file, protocol=pk.DEFAULT_PROTOCOL)
 
         for resource in data:
             current_uom = resource["UnitOfMeasure"]
@@ -161,5 +177,18 @@ class ConfigPanel(tk.Frame):
         self.uom_name_dropdown.component("scrolledlist").setlist(self.uomarr)
         self.uom_name_dropdown.selectitem(self.uomarr[0])
 
-    def create_new_plot(self):
-        pass
+    def pass_config_to_root(self):
+        selected_radio = self.radio_var.get()
+        app_name = self.application_name_dropdown.get()
+        res_name = self.resources_name_dropdown.get()
+        uom_type = self.uom_name_dropdown.get()
+
+        self.parent.pass_config_to_graph(
+            selected_radio,
+            app_name,
+            res_name,
+            uom_type
+        )
+        
+        
+        
