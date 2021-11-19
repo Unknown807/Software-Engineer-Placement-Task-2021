@@ -45,6 +45,7 @@ class GraphCanvas(tk.Frame):
         self.figure.delaxes(self.axes)
         self.axes = self.figure.add_axes([0.1,0.1,0.8,0.8])
         self.axes.tick_params(axis="x", labelrotation=45, labelsize=7)
+        self.axes.tick_params(axis="y", labelsize=7)
 
         # for dates and bars are to be labelled with 'ServiceName'
         xaxis_vals = []

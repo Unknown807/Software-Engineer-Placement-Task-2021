@@ -1,6 +1,7 @@
 # native imports
 import tkinter as tk
 import pickle as pk
+from tkinter import messagebox
 
 # third-party imports
 import Pmw as pmw
@@ -121,6 +122,19 @@ class ConfigPanel(tk.Frame):
             command=self.pass_config_to_root
         )
 
+        self.max_cc_button = tk.Button(
+            self.function_frame,
+            text="Max Cost/Consumption",
+            command=self.get_highest_cost_or_consumption
+        )
+
+        self.min_cc_button = tk.Button(
+            self.function_frame,
+            text="Min Cost/Consumption",
+            command=self.get_lowest_cost_or_consumption
+        )
+
+
         # choose whether to scale the y axis logarithmically
 
         self.logy_var = tk.IntVar()
@@ -136,7 +150,10 @@ class ConfigPanel(tk.Frame):
         self.resources_name_dropdown.pack(side="top")
         self.uom_name_dropdown.pack(side="top", pady=5)
         self.logy_checkbox.pack(side="top")
+
         self.plot_button.pack(side="top", pady=5)
+        self.max_cc_button.pack(side="top")
+        self.min_cc_button.pack(side="top", pady=5)
 
         # packing relevant frames
         self.data_type_frame.pack(side="top", fill="both")
@@ -231,14 +248,42 @@ class ConfigPanel(tk.Frame):
             uom_type
         )
 
-    def get_cost_or_consumption_data(data_type):
-        if data_type == 1: # get highest cost/consumption
-            pass
-        else: # get lowest cost/consumption
-            pass 
+    def get_cost_consumption_data(self):
+        cost_or_consumption = "Cost" if self.cc_var.get() == 1 else "ConsumedQuantity"
+        filename = "application" if self.radio_var.get() == 1 else "resource"
+        with open(filename+"_data.p", "rb") as lfile:
+            return (cost_or_consumption, pk.load(lfile))
 
-    def get_resource_details():
-        pass
+    def get_highest_cost_or_consumption(self):
+        cost_or_consumption, data = self.get_cost_consumption_data()
+
+        _max = 0
+        res_name = "NONE FOUND"
+        res_date = ""
+        for item in data:
+            val = float(item[cost_or_consumption])
+            if val > _max:
+                _max = val
+                res_name = item["ServiceName"]
+                res_date = item["Date"]
         
+        msg = "The resource with the highest "+cost_or_consumption.lower()+" is "+res_name+", with "+str(_max)+" on the "+res_date
+        messagebox.showinfo("Results", msg)
+
+    def get_lowest_cost_or_consumption(self):
+        cost_or_consumption, data = self.get_cost_consumption_data()
+
+        _min = float(data[0][cost_or_consumption])
+        res_name = data[0]["ServiceName"]
+        res_date = data[0]["Date"]
+        for item in data:
+            val = float(item[cost_or_consumption])
+            if val < _min:
+                _min = val
+                res_name = item["ServiceName"]
+                res_date = item["Date"]
+
+        msg = "The resource with the lowest "+cost_or_consumption.lower()+" is "+res_name+", with "+str(_min)+" on the "+res_date
+        messagebox.showinfo("Results", msg)
         
         
