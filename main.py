@@ -1,11 +1,13 @@
 # native imports
 import tkinter as tk
+from tkinter import messagebox
 
 # third-party imports
 
 # custom imports
 from graph_canvas import GraphCanvas
 from config_panel import ConfigPanel
+from api_utils import checkConnectivity
 
 class Main(tk.Tk):
     def __init__(self, *args, **kwargs):
@@ -27,8 +29,15 @@ class Main(tk.Tk):
             padx=5
         )
 
+        self.close_window()
+
     def pass_config_to_graph(self, *args):
         self.graph_canvas.create_new_plot(*args)
+
+    def close_window(self):
+        if not checkConnectivity():
+            messagebox.showerror("Connection Error", "Please check your internet connection and try again")
+            self.destroy()
         
 if __name__ == "__main__":
     root = Main()
