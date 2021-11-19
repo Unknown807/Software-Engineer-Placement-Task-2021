@@ -24,7 +24,7 @@ class ConfigPanel(tk.Frame):
         self.res_names = requestAPI("resources")
 
         # to store radio buttons for applications/resources data
-        self.data_type_frame = tk.LabelFrame(self, text="View data for:")
+        self.data_type_frame = tk.LabelFrame(self, text="Look at:")
 
         self.radio_var = tk.IntVar()
         self.app_radio = tk.Radiobutton(
@@ -43,8 +43,29 @@ class ConfigPanel(tk.Frame):
             command = self.set_config_options
         )
 
+        # view cost or consumption of resource/application's resources by some UnitOfMeasure
+
+        self.yaxis_type_frame = tk.LabelFrame(self, text="View data for:")
+
+        self.cc_var = tk.IntVar()
+        self.cost_radio = tk.Radiobutton(
+            self.yaxis_type_frame,
+            text="Cost",
+            variable=self.cc_var,
+            value=1,
+        )
+
+        self.consumption_radio = tk.Radiobutton(
+            self.yaxis_type_frame,
+            text="Consumption",
+            variable=self.cc_var,
+            value=2,
+        )
+
         self.app_radio.pack(side="top", anchor="w")
         self.res_radio.pack(side="top", anchor="w")
+        self.cost_radio.pack(side="top", anchor="w")
+        self.consumption_radio.pack(side="top", anchor="w")
 
         # to configure options such as serviceName and UnitOfMeasurement
         self.config_options_frame = tk.LabelFrame(self, text="Configuration Options:")
@@ -103,7 +124,8 @@ class ConfigPanel(tk.Frame):
         self.plot_button.pack(side="top")
 
         # packing relevant frames
-        self.data_type_frame.pack(side="top", fill="both", pady=5)
+        self.data_type_frame.pack(side="top", fill="both")
+        self.yaxis_type_frame.pack(side="top", fill="both", pady=5)
         self.config_options_frame.pack(side="top", fill="both", expand=True)
         
         self.radio_var.set(1)
@@ -179,12 +201,15 @@ class ConfigPanel(tk.Frame):
 
     def pass_config_to_root(self):
         selected_radio = self.radio_var.get()
+        selected_yaxis_radio = self.cc_var.get()
+
         app_name = self.application_name_dropdown.get()
         res_name = self.resources_name_dropdown.get()
         uom_type = self.uom_name_dropdown.get()
 
         self.parent.pass_config_to_graph(
             selected_radio,
+            selected_yaxis_radio,
             app_name,
             res_name,
             uom_type
