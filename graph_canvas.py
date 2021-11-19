@@ -18,9 +18,10 @@ class GraphCanvas(tk.Frame):
             dpi=100
         )
 
-        self.plot1 = self.figure.add_subplot(111)
-
-        self.plot1.plot([i**2 for i in range(101)])
+        self.placeholder_plot = self.figure.add_subplot(111)
+        self.placeholder_plot.text(0.5, 0.5, "Use The Configuration\nOptions to Create a Plot", 
+            verticalalignment="center", horizontalalignment="center",
+            color="orange", fontsize=14)
 
         self.canvas = FigureCanvasTkAgg(
             self.figure,
