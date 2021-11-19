@@ -70,6 +70,9 @@ class ConfigPanel(tk.Frame):
         # to configure options such as serviceName and UnitOfMeasurement
         self.config_options_frame = tk.LabelFrame(self, text="Configuration Options:")
 
+        # functions which tell things about the data
+        self.function_frame = tk.LabelFrame(self, text="Functions:")
+
         self.application_name_dropdown = pmw.ComboBox(
             self.config_options_frame,
             label_text="Application Name",
@@ -113,22 +116,36 @@ class ConfigPanel(tk.Frame):
         )
 
         self.plot_button = tk.Button(
-            self.config_options_frame,
+            self.function_frame,
             text="Create Plot",
             command=self.pass_config_to_root
+        )
+
+        # choose whether to scale the y axis logarithmically
+
+        self.logy_var = tk.IntVar()
+        self.logy_checkbox = tk.Checkbutton(
+            self.config_options_frame,
+            text="Log Y Axis",
+            variable=self.logy_var,
+            onvalue=1,
+            offvalue=0,
         )
 
         self.application_name_dropdown.pack(side="top", pady=5)
         self.resources_name_dropdown.pack(side="top")
         self.uom_name_dropdown.pack(side="top", pady=5)
-        self.plot_button.pack(side="top")
+        self.logy_checkbox.pack(side="top")
+        self.plot_button.pack(side="top", pady=5)
 
         # packing relevant frames
         self.data_type_frame.pack(side="top", fill="both")
         self.yaxis_type_frame.pack(side="top", fill="both", pady=5)
         self.config_options_frame.pack(side="top", fill="both", expand=True)
+        self.function_frame.pack(side="top", fill="both", pady=5)
         
         self.radio_var.set(1)
+        self.cc_var.set(1)
         self.set_config_options()
         self.select_application(self.app_names[0])
 
@@ -138,12 +155,12 @@ class ConfigPanel(tk.Frame):
         if selected_radio == 1:
             self.resources_name_dropdown.pack_forget()
             self.uom_name_dropdown.pack_forget()
-            self.plot_button.pack_forget()
+            self.logy_checkbox.pack_forget()
 
             self.application_name_dropdown.pack(side="top", pady=5)
             self.resources_name_dropdown.pack(side="top")
             self.uom_name_dropdown.pack(side="top", pady=5)
-            self.plot_button.pack(side="top")
+            self.logy_checkbox.pack(side="top")
 
             self.application_name_dropdown.selectitem(self.app_names[0])
             self.select_application(self.app_names[0])
@@ -154,7 +171,7 @@ class ConfigPanel(tk.Frame):
             self.select_resource(self.res_names[0])
 
     def select_application(self, selected):
-        self.app_res_names = ["All"]
+        self.app_res_names = []
         self.uomarr = []
 
         data = requestAPI("applications/"+selected)
@@ -184,7 +201,6 @@ class ConfigPanel(tk.Frame):
             return
 
         self.uomarr = []
-
         data = requestAPI("resources/"+selected)
 
         with open("resource_data.p", "wb") as save_file:
@@ -202,18 +218,27 @@ class ConfigPanel(tk.Frame):
     def pass_config_to_root(self):
         selected_radio = self.radio_var.get()
         selected_yaxis_radio = self.cc_var.get()
+        log_yaxis = self.logy_var.get()
 
-        app_name = self.application_name_dropdown.get()
         res_name = self.resources_name_dropdown.get()
         uom_type = self.uom_name_dropdown.get()
 
         self.parent.pass_config_to_graph(
             selected_radio,
             selected_yaxis_radio,
-            app_name,
+            log_yaxis,
             res_name,
             uom_type
         )
+
+    def get_cost_or_consumption_data(data_type):
+        if data_type == 1: # get highest cost/consumption
+            pass
+        else: # get lowest cost/consumption
+            pass 
+
+    def get_resource_details():
+        pass
         
         
         
