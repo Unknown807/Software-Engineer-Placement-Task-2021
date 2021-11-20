@@ -6,6 +6,7 @@ import pickle as pk
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, 
 NavigationToolbar2Tk)
+import matplotlib.ticker as mticker
 
 # custom imports
 
@@ -45,7 +46,7 @@ class GraphCanvas(tk.Frame):
         self.figure.delaxes(self.axes)
         self.axes = self.figure.add_axes([0.1,0.1,0.8,0.8])
         self.axes.tick_params(axis="x", labelrotation=45, labelsize=7)
-        self.axes.tick_params(axis="y", labelsize=7)
+        self.axes.tick_params(axis="y", which="both", labelrotation=45, labelsize=7)
 
         # for dates and bars are to be labelled with 'ServiceName'
         xaxis_vals = []
@@ -69,7 +70,8 @@ class GraphCanvas(tk.Frame):
 
         if log_yaxis:
             self.axes.set_yscale("log")
-        
+            #self.axes.yaxis.set_minor_formatter(mticker.FuncFormatter(lambda x,_: f"$10^{{{int(x)}}}$"))
+
         self.current_plot = self.axes.bar(xaxis_vals, yaxis_vals, color="cornflowerblue")
 
         self.canvas.draw()
