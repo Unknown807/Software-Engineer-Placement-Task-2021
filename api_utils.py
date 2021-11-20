@@ -19,6 +19,9 @@ def checkConnectivity():
         return False
 
 def requestAPI(path):
+    '''
+    sends request to provided API for application/resource data
+    '''
     response = requests.get("https://engineering-task.elancoapps.com/api/"+path)
     
     if (response.status_code == 200):

@@ -6,12 +6,15 @@ import pickle as pk
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, 
 NavigationToolbar2Tk)
-import matplotlib.ticker as mticker
 
 # custom imports
 
 
 class GraphCanvas(tk.Frame):
+    '''
+    A tkinter frame which uses the imported classes to integrate tkinter with matplotlib and to plot the
+    application/frame data passed to it
+    '''
     def __init__(self, parent):
         super().__init__(parent)
 
@@ -24,6 +27,7 @@ class GraphCanvas(tk.Frame):
 
         self.axes = self.figure.add_axes([0.1,0.1,0.8,0.8])
 
+        # default text plot telling user to use the config options to create a plot
         self.axes.text(0.5, 0.5, "Use The Configuration\nOptions to Create a Plot", 
             verticalalignment="center", horizontalalignment="center",
             color="orange", fontsize=14)
@@ -43,6 +47,11 @@ class GraphCanvas(tk.Frame):
         self.toolbar.update()
 
     def create_new_plot(self, selected_radio, selected_yaxis_radio, log_yaxis, res_name, uom_type):
+        '''
+        Receives data to plot as a bar chart (after resetting canvas) with some options for 
+        logging the y-axis and rotation of labels, so they don't get cut off because they're too long, e.g
+        when using standard form
+        '''
         self.figure.delaxes(self.axes)
         self.axes = self.figure.add_axes([0.1,0.1,0.8,0.8])
         self.axes.tick_params(axis="x", labelrotation=45, labelsize=7)

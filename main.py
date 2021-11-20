@@ -10,6 +10,10 @@ from config_panel import ConfigPanel
 from api_utils import checkConnectivity
 
 class Main(tk.Tk):
+    '''
+    Creates the tkinter window and places the configuration panel on the left and the matplotlib canvas on the right
+    and facilitates data to be passed from one to the other
+    '''
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -32,9 +36,17 @@ class Main(tk.Tk):
         self.close_window()
 
     def pass_config_to_graph(self, *args):
+        '''
+        Passes all data of selected application/resource to the GraphCanvas object (self.graph_canvas),
+        in order to plot it on the screen
+        '''
         self.graph_canvas.create_new_plot(*args)
 
     def close_window(self):
+        '''
+        If there is no internet connection, then calls for data from the API cannot be made, so the program
+        gives an error popup and exits
+        '''
         if not checkConnectivity():
             messagebox.showerror("Connection Error", "Please check your internet connection and try again")
             self.destroy()

@@ -10,6 +10,10 @@ import Pmw as pmw
 from api_utils import requestAPI
 
 class ConfigPanel(tk.Frame):
+    '''
+    A tkinter frame placed on the left side of the screen, used to communicate with the API and get the data + user
+    configurations of said data in order to plot it on the GraphCanvas and calculate min/max cost/consumption
+    '''
     def __init__(self, parent):
         super().__init__(parent)
 
@@ -134,8 +138,7 @@ class ConfigPanel(tk.Frame):
             command=self.get_lowest_cost_or_consumption
         )
 
-
-        # choose whether to scale the y axis logarithmically
+        # checkbox to choose whether to scale the y axis logarithmically
 
         self.logy_var = tk.IntVar()
         self.logy_checkbox = tk.Checkbutton(
@@ -161,12 +164,17 @@ class ConfigPanel(tk.Frame):
         self.config_options_frame.pack(side="top", fill="both", expand=True)
         self.function_frame.pack(side="top", fill="both", pady=5)
         
+        # pick some default options
         self.radio_var.set(1)
         self.cc_var.set(1)
         self.set_config_options()
         self.select_application(self.app_names[0])
 
     def set_config_options(self):
+        '''
+        if you select applications or resources, some options should disappear as they only correspond to one or the other
+        e.g there should be no applications dropdown if you're looking at /resources
+        '''
         selected_radio = self.radio_var.get()
 
         if selected_radio == 1:
@@ -188,6 +196,11 @@ class ConfigPanel(tk.Frame):
             self.select_resource(self.res_names[0])
 
     def select_application(self, selected):
+        '''
+        if you select an application from the dropdown, it will get data for it from the API and save it.
+        It will then also alter other dropdowns, to show what resources the application has and all their
+        respective units of measure
+        '''
         self.app_res_names = []
         self.uomarr = []
 
@@ -214,6 +227,9 @@ class ConfigPanel(tk.Frame):
         self.uom_name_dropdown.selectitem(self.uomarr[0])
 
     def select_resource(self, selected):
+        '''
+        The same as select_application, but it just focuses on saving API data to a separate file
+        '''
         if self.radio_var.get() == 1:
             return
 
@@ -233,6 +249,10 @@ class ConfigPanel(tk.Frame):
         self.uom_name_dropdown.selectitem(self.uomarr[0])
 
     def pass_config_to_root(self):
+        '''
+        When you choose to create a new graph plot, this method will pass all the necessary data to a method
+        in the root object, 'pass_config_to_graph'.
+        '''
         selected_radio = self.radio_var.get()
         selected_yaxis_radio = self.cc_var.get()
         log_yaxis = self.logy_var.get()
@@ -249,12 +269,19 @@ class ConfigPanel(tk.Frame):
         )
 
     def get_cost_consumption_data(self):
+        '''
+        gets the file data according to the which radio buttons are selected and is shared by the min/max methods
+        '''
         cost_or_consumption = "Cost" if self.cc_var.get() == 1 else "ConsumedQuantity"
         filename = "application" if self.radio_var.get() == 1 else "resource"
         with open(filename+"_data.p", "rb") as lfile:
             return (cost_or_consumption, pk.load(lfile))
 
     def get_highest_cost_or_consumption(self):
+        '''
+        Loops through and gets the highest cost/consumption from the data of the current resource or all
+        resources of an application
+        '''
         cost_or_consumption, data = self.get_cost_consumption_data()
 
         _max = 0
@@ -271,6 +298,10 @@ class ConfigPanel(tk.Frame):
         messagebox.showinfo("Results", msg)
 
     def get_lowest_cost_or_consumption(self):
+        '''
+        Loops through and gets the lowest cost/consumption from the data of the current resource or all
+        resources of an application
+        '''
         cost_or_consumption, data = self.get_cost_consumption_data()
 
         _min = float(data[0][cost_or_consumption])
